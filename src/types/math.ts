@@ -10,6 +10,8 @@ export interface SolutionResult {
   timestamp: number;
   userPrompt?: string;
   imagePreviewUrl?: string;
+  warning?: string;
+  isFallback?: boolean;
 }
 
 export interface QuizQuestion {

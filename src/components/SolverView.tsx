@@ -172,6 +172,8 @@ export const SolverView: React.FC<SolverViewProps> = ({
         timestamp: Date.now(),
         userPrompt: promptToSend,
         imagePreviewUrl: inputMode === 'image' && imageDataUrl ? imageDataUrl : undefined,
+        warning: data.warning,
+        isFallback: data.isFallback,
       };
 
       setResult(newResult);
@@ -196,8 +198,16 @@ export const SolverView: React.FC<SolverViewProps> = ({
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     } catch (err: any) {
-      console.error('Solve error:', err);
-      setErrorMessage(err.message || 'Something went wrong while solving. Please try again.');
+      let friendly = err.message || 'Something went wrong while solving. Please try again.';
+      if (
+        friendly.includes('401') ||
+        friendly.includes('UNAUTHENTICATED') ||
+        friendly.includes('ACCESS_TOKEN_TYPE_UNSUPPORTED')
+      ) {
+        friendly =
+          'Gemini API authentication issue (401). Please switch to the "Type Question" tab to solve with Sheddy’s built-in JSS math engine, or update your GEMINI_API_KEY in Settings > Secrets.';
+      }
+      setErrorMessage(friendly);
     } finally {
       setIsLoading(false);
     }
@@ -502,11 +512,26 @@ Teacher tip: ${result.keyTip}`;
 
         {/* Error message banner */}
         {errorMessage && (
-          <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/80 p-4 text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/60 dark:text-rose-200">
-            <AlertCircle className="h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
-            <div className="text-xs sm:text-sm font-medium">
-              <p>{errorMessage}</p>
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50/90 p-4 text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/60 dark:text-rose-200">
+            <div className="flex items-start gap-2.5">
+              <AlertCircle className="h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
+              <div className="text-xs sm:text-sm font-medium">
+                <p>{errorMessage}</p>
+              </div>
             </div>
+            {inputMode === 'image' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setInputMode('type');
+                  setErrorMessage(null);
+                }}
+                className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-rose-700 transition-colors shadow-xs"
+              >
+                <Edit3 className="h-3.5 w-3.5" />
+                <span>Switch to Type Question</span>
+              </button>
+            )}
           </div>
         )}
 
@@ -589,6 +614,17 @@ Teacher tip: ${result.keyTip}`;
               </button>
             </div>
           </div>
+
+          {/* Fallback Engine Notice Banner */}
+          {result.warning && (
+            <div className="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50/90 p-4 text-blue-900 shadow-2xs dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-200">
+              <Sparkles className="h-5 w-5 shrink-0 text-amber-500 mt-0.5" />
+              <div className="text-xs sm:text-sm font-medium leading-relaxed">
+                <p className="font-bold text-blue-950 dark:text-blue-100">Step-by-Step Mathematical Solver Engine</p>
+                <p className="mt-0.5">{result.warning}</p>
+              </div>
+            </div>
+          )}
 
           {/* Extracted Problem Verification Box */}
           <div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">

@@ -156,8 +156,8 @@ export const TopicPracticeView: React.FC<TopicPracticeViewProps> = ({
       setSelectedOption(null);
       setIsSubmitted(false);
       setShowHint(false);
-    } catch (err) {
-      console.error('Error generating AI question:', err);
+    } catch {
+      // Fallback already handled
     } finally {
       setIsLoadingAiQuestion(false);
     }
