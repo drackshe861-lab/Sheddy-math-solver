@@ -1,0 +1,8 @@
+{
+  "name": "Remix Sheddy Math Solver",
+  "description": "Your JSS Math Companion \u0026 Study Helper - Step-by-step math solver and study hub for Junior Secondary School mathematics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
